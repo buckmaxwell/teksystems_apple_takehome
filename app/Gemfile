@@ -31,6 +31,9 @@ gem "solid_cable"
 # Use Redis for caching
 gem "redis", "~> 4.0"
 
+# Use TailwindCSS for stylesheets
+gem "tailwindcss-rails", "~> 4.2"
+
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
@@ -61,3 +64,4 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
