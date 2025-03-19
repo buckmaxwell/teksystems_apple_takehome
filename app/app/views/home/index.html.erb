@@ -1,0 +1,13 @@
+<h1>Weather Lookup</h1>
+
+<form data-controller="weather" data-action="submit->weather#submitForm">
+  <label for="address">Enter Address:</label>
+  <input id="autocomplete" data-weather-target="input" type="text" placeholder="Enter city, state, or ZIP" required autocomplete="off" data-action="input->weather#fetchSuggestions">
+  <ul id="autocomplete-results" data-weather-target="results"></ul>
+
+  <button type="submit">Get Weather</button>
+</form>
+
+<div id="weather-result" data-weather-target="weather"></div>
+
+<meta name="google-api-key" content="<%= ENV['GOOGLE_PLACES_API_KEY'] %>">
