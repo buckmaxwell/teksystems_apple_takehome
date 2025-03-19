@@ -12,6 +12,5 @@ module App
     ENV["GOOGLE_PLACES_API_KEY"] ||= Rails.application.credentials.google_places_api_key
 
     config.autoload_lib(ignore: %w[assets tasks])
-
   end
 end
