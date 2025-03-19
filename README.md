@@ -1,6 +1,7 @@
 # TEKsystems / Apple Take Home Assignment
 
 
+
 This is a Ruby on Rails application running inside Docker for local development.
 
 ## Prerequisites
