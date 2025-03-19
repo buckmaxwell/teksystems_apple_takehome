@@ -11,8 +11,8 @@ This is a Ruby on Rails application running inside Docker for local development.
 
 1. **Clone the Repository**  
    ```sh
-   git clone <repo_url>
-   cd <repo_name>
+   git clone git@github.com:buckmaxwell/teksystems_apple_takehome.git
+   cd teksystems_apple_takehome
    ```
 
 2. **Start the Services**  
