@@ -2,7 +2,8 @@
 
 https://github.com/user-attachments/assets/e27a782b-ce04-4a49-be89-14d3d675bfb1
 
-This is a Ruby on Rails application running inside Docker for local development. Since this is a simple project I chose to serve JavaScript from rails, though separating into a SPA could have some benefit at some point. Tests run on PRs and merges to the master branch. There is an integration test runner that runs on a schedule and can also be run manually. I chose to add postgres as an available database, initially planning to store information about requests made. Since this wasn't strictly part of the assignment I elected not to add those models, but set things up so that their addition would be easy.
+This is a Ruby on Rails application running inside Docker for local development.Since this is a simple project I chose to serve JavaScript from rails, though separating into a SPA could have some benefit at some point. Tests run on PRs and merges to the master branch. There is an integration test runner that runs on a schedule and can also be run manually. I chose to add postgres as an available database, initially planning to store information about requests made. Since this wasn't strictly part of the assignment I elected not to add those models, but set things up so that their addition would be easy. Finally, in an effort to demonstrate both client and server side api interactions, I make the calls to the google API on the client side. Because that makes the API key I am using visible on the front end, I might have elected to take a slightly different approach in production.
+
 
 *NOTE* for the api integration to work, you'll need to have the correct config/master.key file. This is not included in the repo for security reasons, I included it in the email I sent to you, but please let me know if you need it again.
 
