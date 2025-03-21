@@ -83,12 +83,26 @@ export default class extends Controller {
     const { zip, lat, lon } = this.selectedLocation;
     const response = await fetch(`/forecast?zip=${zip}&lat=${lat}&lon=${lon}`);
     const weather = await response.json();
-    this.weatherTarget.innerHTML = `
-      <h2 class="text-lg font-semibold mb-2">Weather for ${this.inputTarget.value}</h2>
-      <p>Temperature: ${weather.temperature}°F</p>
-      <p>High: ${weather.high}°F, Low: ${weather.low}°F</p>
-      <p>Forecast: ${weather.forecast}</p>
-    `;
+
+    // Only show weather result if there's valid data
+    if (weather.temperature) {
+      this.weatherTarget.classList.remove("hidden"); // Make it visible
+      // Update weather details
+      this.weatherTarget.innerHTML = `
+	    <div class="relative rounded-lg overflow-hidden shadow-lg">
+	      <div class="absolute inset-0 bg-black/50"></div> <!-- Dark overlay -->
+	      <div class="relative p-4 text-white">
+		<h2 class="text-lg font-semibold">${this.inputTarget.value}</h2>
+		<p>Temperature: ${weather.temperature}°F</p>
+		<p>High: ${weather.high}°F, Low: ${weather.low}°F</p>
+		<p>Forecast: ${weather.forecast}</p>
+	      </div>
+	    </div>`;
+    } else {
+      this.weatherTarget.classList.add("hidden"); // Hide if no data
+    }
+
+    this.updateBackground(weather.background_image);
   }
 
   extractZipCode(place) {
@@ -99,5 +113,15 @@ export default class extends Controller {
       }
     }
     return null;
+    this.updateBackground(weather.background_image);
+  }
+
+  updateBackground(imageUrl) {
+    this.weatherTarget.style.backgroundImage = `url(${imageUrl})`;
+    this.weatherTarget.style.backgroundSize = "cover";
+    this.weatherTarget.style.backgroundPosition = "center";
+    this.weatherTarget.style.backgroundRepeat = "no-repeat";
+    this.weatherTarget.style.color = "white"; // Ensure text remains readable
+    console.log("Updated weather background");
   }
 }
