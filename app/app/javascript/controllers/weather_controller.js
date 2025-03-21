@@ -1,4 +1,6 @@
 import { Controller } from "@hotwired/stimulus";
+import { fetchPlaceSuggestions, extractZipLatLon } from "utils/google_places";
+import { renderWeatherCard } from "templates/weather_card";
 
 export default class extends Controller {
   static targets = ["input", "results", "weather"];
@@ -16,41 +18,23 @@ export default class extends Controller {
       return;
     }
 
-    const response = await fetch(
-      "https://places.googleapis.com/v1/places:searchText",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": this.apiKey,
-          "X-Goog-FieldMask":
-            "places.displayName,places.shortFormattedAddress,places.addressComponents,places.location",
-        },
-        body: JSON.stringify({ textQuery: query }),
-      }
-    );
-
-    const data = await response.json();
-    this.updateAutocompleteResults(data.places ? data.places.slice(0, 5) : []);
+    const places = await fetchPlaceSuggestions(query, this.apiKey);
+    this.updateAutocompleteResults(places);
   }
 
-  updateAutocompleteResults(results) {
+  updateAutocompleteResults(places) {
     this.resultsTarget.innerHTML = "";
 
-    if (results.length === 0) {
+    if (!places || places.length === 0) {
       this.resultsTarget.classList.add("hidden");
       return;
     }
 
-    results.forEach((place) => {
-      const displayText = place.shortFormattedAddress || "Unknown Address";
-      const zipCode = this.extractZipCode(place);
-      const lat = place.location?.latitude;
-      const lon = place.location?.longitude;
-
+    places.forEach((place) => {
+      const { zip, lat, lon } = extractZipLatLon(place);
       const li = document.createElement("li");
-      li.textContent = displayText;
-      li.dataset.zip = zipCode || "";
+      li.textContent = place.shortFormattedAddress || "Unknown Address";
+      li.dataset.zip = zip || "";
       li.dataset.lat = lat;
       li.dataset.lon = lon;
       li.dataset.action = "click->weather#selectSuggestion";
@@ -74,51 +58,25 @@ export default class extends Controller {
 
   async submitForm(event) {
     event.preventDefault();
-
-    if (!this.selectedLocation) {
+    const { zip, lat, lon } = this.selectedLocation || {};
+    if (!zip || !lat || !lon) {
       alert("Please select an address from the suggestions.");
       return;
     }
 
-    const { zip, lat, lon } = this.selectedLocation;
     const response = await fetch(`/forecast?zip=${zip}&lat=${lat}&lon=${lon}`);
     const weather = await response.json();
-    const cachedIndicator = weather.cached
-      ? `<p class="text-[10px] text-gray-400 mt-1 text-right">⚡ Loaded from cache</p>`
-      : "";
 
-    // Only show weather result if there's valid data
     if (weather.temperature) {
-      this.weatherTarget.classList.remove("hidden"); // Make it visible
-      // Update weather details
-
-      this.weatherTarget.innerHTML = `
-	    <div class="relative rounded-lg overflow-hidden shadow-lg">
-	      <div class="absolute inset-0 bg-black/50"></div> <!-- Dark overlay -->
-	      <div class="relative p-4 text-white">
-		<h2 class="text-lg font-semibold">${this.inputTarget.value}</h2>
-		<p>Temperature: ${weather.temperature}°F</p>
-		<p>High: ${weather.high}°F, Low: ${weather.low}°F</p>
-		<p>Forecast: ${weather.forecast}</p>
-		${cachedIndicator}
-	      </div>
-	    </div>`;
+      this.weatherTarget.classList.remove("hidden");
+      this.weatherTarget.innerHTML = renderWeatherCard(
+        weather,
+        this.inputTarget.value
+      );
+      this.updateBackground(weather.background_image);
     } else {
-      this.weatherTarget.classList.add("hidden"); // Hide if no data
+      this.weatherTarget.classList.add("hidden");
     }
-
-    this.updateBackground(weather.background_image);
-  }
-
-  extractZipCode(place) {
-    if (!place.addressComponents) return null;
-    for (let component of place.addressComponents) {
-      if (component.types.includes("postal_code")) {
-        return component.longText;
-      }
-    }
-    return null;
-    this.updateBackground(weather.background_image);
   }
 
   updateBackground(imageUrl) {
@@ -126,7 +84,6 @@ export default class extends Controller {
     this.weatherTarget.style.backgroundSize = "cover";
     this.weatherTarget.style.backgroundPosition = "center";
     this.weatherTarget.style.backgroundRepeat = "no-repeat";
-    this.weatherTarget.style.color = "white"; // Ensure text remains readable
-    console.log("Updated weather background");
+    this.weatherTarget.style.color = "white";
   }
 }
