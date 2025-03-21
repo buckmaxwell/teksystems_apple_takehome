@@ -1,0 +1,44 @@
+name: Integration Tests
+
+on:
+  schedule:
+    - cron: '0 5 * * *'  # Runs daily at 5:00 AM UTC
+  workflow_dispatch:       # Allows manual triggering via GitHub UI
+
+jobs:
+  run_integration_tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+          working-directory: app
+
+      - name: Prepare test database
+        env:
+          RAILS_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432
+        run: bin/rails db:test:prepare
+        working-directory: app
+
+      - name: Run integration tests
+        env:
+          RAILS_ENV: test
+        run: bin/rails test:integration
+        working-directory: app
