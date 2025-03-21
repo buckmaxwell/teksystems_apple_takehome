@@ -101,7 +101,7 @@ jobs:
         env:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
-        run: 'bin/rails db:test:prepare test:models test:controllers test:services test:helpers test:mailers test:jobs test:channels'
+        run: 'bin/rails db:test:prepare test/models test/controllers test/services test/helpers test/mailers test/jobs test/channels'
 
         working-directory: app
 
