@@ -30,15 +30,15 @@ jobs:
           bundler-cache: true
           working-directory: app
 
-      - name: Prepare test database
-        env:
-          RAILS_ENV: test
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432
-        run: bin/rails db:test:prepare
-        working-directory: app
-
       - name: Run integration tests
         env:
           RAILS_ENV: test
-        run: 'bin/rails test test/integration'
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432
+        run: 'bin/rails db:test:prepare && bin/rails test test/integration'
+        working-directory: app
+
+      - name: Run tests
+        env:
+          RAILS_ENV: test
+
         working-directory: app
