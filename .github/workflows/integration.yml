@@ -40,5 +40,5 @@ jobs:
       - name: Run integration tests
         env:
           RAILS_ENV: test
-        run: bin/rails test:integration
+        run: 'bin/rails test test/integration'
         working-directory: app
