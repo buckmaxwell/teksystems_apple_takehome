@@ -13,4 +13,4 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["bin/rails", "server", "-b", "0.0.0.0"]
+CMD ["sh", "-c", "rm -f tmp/pids/server.pid && bin/rails tailwindcss:build && TAILWINDCSS_WATCHER=polling bin/rails tailwindcss:watch & bin/rails server -b 0.0.0.0"]

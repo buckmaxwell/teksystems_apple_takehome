@@ -12,6 +12,7 @@ export default class extends Controller {
     const query = this.inputTarget.value.trim();
     if (query.length < 3) {
       this.resultsTarget.innerHTML = "";
+      this.resultsTarget.classList.add("hidden");
       return;
     }
 
@@ -34,7 +35,12 @@ export default class extends Controller {
   }
 
   updateAutocompleteResults(results) {
-    this.resultsTarget.innerHTML = ""; // Clear previous results
+    this.resultsTarget.innerHTML = "";
+
+    if (results.length === 0) {
+      this.resultsTarget.classList.add("hidden");
+      return;
+    }
 
     results.forEach((place) => {
       const displayText = place.shortFormattedAddress || "Unknown Address";
@@ -43,14 +49,18 @@ export default class extends Controller {
       li.textContent = displayText;
       li.dataset.zip = this.extractZipCode(place);
       li.dataset.action = "click->weather#selectSuggestion";
+      li.className = "px-4 py-2 cursor-pointer hover:bg-gray-100";
       this.resultsTarget.appendChild(li);
     });
+
+    this.resultsTarget.classList.remove("hidden");
   }
 
   selectSuggestion(event) {
     this.inputTarget.value = event.target.textContent;
     this.selectedZipCode = event.target.dataset.zip;
-    this.resultsTarget.innerHTML = ""; // Clear dropdown
+    this.resultsTarget.innerHTML = "";
+    this.resultsTarget.classList.add("hidden");
   }
 
   async submitForm(event) {
@@ -64,7 +74,7 @@ export default class extends Controller {
     const response = await fetch(`/forecast?zip=${this.selectedZipCode}`);
     const weather = await response.json();
     this.weatherTarget.innerHTML = `
-      <h2>Weather for ZIP ${this.selectedZipCode}</h2>
+      <h2 class="text-lg font-semibold mb-2">Weather for ZIP ${this.selectedZipCode}</h2>
       <p>Temperature: ${weather.temperature}°F</p>
       <p>High: ${weather.high}°F, Low: ${weather.low}°F</p>
       <p>Forecast: ${weather.forecast}</p>
