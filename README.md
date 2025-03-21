@@ -1,8 +1,8 @@
 # TEKsystems / Apple Take Home Assignment
 
+https://github.com/user-attachments/assets/e27a782b-ce04-4a49-be89-14d3d675bfb1
 
-
-This is a Ruby on Rails application running inside Docker for local development.
+This is a Ruby on Rails application running inside Docker for local development. Since this is a simple project I chose to serve JavaScript from rails, though separating into a SPA could have some benefit at some point. Tests run on PRs and merges to the master branch. There is an integration test runner that runs on a schedule and can also be run manually. I chose to add postgres as an available database, initially planning to store information about requests made. Since this wasn't strictly part of the assignment I elected not to add those models, but set things up so that their addition would be easy.
 
 ## Prerequisites
 - [Docker](https://www.docker.com/get-started) 
