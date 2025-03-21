@@ -5,7 +5,7 @@ export default class extends Controller {
 
   connect() {
     this.apiKey = document.querySelector("meta[name='google-api-key']").content;
-    this.selectedZipCode = null;
+    this.selectedLocation = null;
   }
 
   async fetchSuggestions() {
@@ -24,7 +24,7 @@ export default class extends Controller {
           "Content-Type": "application/json",
           "X-Goog-Api-Key": this.apiKey,
           "X-Goog-FieldMask":
-            "places.displayName,places.formattedAddress,places.addressComponents,places.shortFormattedAddress",
+            "places.displayName,places.shortFormattedAddress,places.addressComponents,places.location",
         },
         body: JSON.stringify({ textQuery: query }),
       }
@@ -44,10 +44,15 @@ export default class extends Controller {
 
     results.forEach((place) => {
       const displayText = place.shortFormattedAddress || "Unknown Address";
+      const zipCode = this.extractZipCode(place);
+      const lat = place.location?.latitude;
+      const lon = place.location?.longitude;
 
       const li = document.createElement("li");
       li.textContent = displayText;
-      li.dataset.zip = this.extractZipCode(place);
+      li.dataset.zip = zipCode;
+      li.dataset.lat = lat;
+      li.dataset.lon = lon;
       li.dataset.action = "click->weather#selectSuggestion";
       li.className = "px-4 py-2 cursor-pointer hover:bg-gray-100";
       this.resultsTarget.appendChild(li);
@@ -58,7 +63,11 @@ export default class extends Controller {
 
   selectSuggestion(event) {
     this.inputTarget.value = event.target.textContent;
-    this.selectedZipCode = event.target.dataset.zip;
+    this.selectedLocation = {
+      zip: event.target.dataset.zip,
+      lat: event.target.dataset.lat,
+      lon: event.target.dataset.lon,
+    };
     this.resultsTarget.innerHTML = "";
     this.resultsTarget.classList.add("hidden");
   }
@@ -66,15 +75,16 @@ export default class extends Controller {
   async submitForm(event) {
     event.preventDefault();
 
-    if (!this.selectedZipCode) {
+    if (!this.selectedLocation || !this.selectedLocation.zip) {
       alert("Please select an address from the suggestions.");
       return;
     }
 
-    const response = await fetch(`/forecast?zip=${this.selectedZipCode}`);
+    const { zip, lat, lon } = this.selectedLocation;
+    const response = await fetch(`/forecast?zip=${zip}&lat=${lat}&lon=${lon}`);
     const weather = await response.json();
     this.weatherTarget.innerHTML = `
-      <h2 class="text-lg font-semibold mb-2">Weather for ZIP ${this.selectedZipCode}</h2>
+      <h2 class="text-lg font-semibold mb-2">Weather for ${this.inputTarget.value}</h2>
       <p>Temperature: ${weather.temperature}°F</p>
       <p>High: ${weather.high}°F, Low: ${weather.low}°F</p>
       <p>Forecast: ${weather.forecast}</p>
