@@ -33,7 +33,7 @@ class WeatherControllerTest < ActionDispatch::IntegrationTest
     WeatherCacheService.stub :fetch, nil do
       WeatherService.stub :get_weather, @weather_data do
         stored = Minitest::Mock.new
-        stored.expect(:call, nil, [@valid_params[:zip], @weather_data])
+        stored.expect(:call, nil, [ @valid_params[:zip], @weather_data ])
 
         WeatherCacheService.stub :store, stored do
           get "/forecast", params: @valid_params
