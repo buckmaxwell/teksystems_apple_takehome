@@ -1,5 +1,6 @@
 class WeatherController < ApplicationController
   require "net/http"
+  require "redis"
 
   def show
     zip_code = params[:zip]
@@ -10,9 +11,21 @@ class WeatherController < ApplicationController
       return render json: { error: "Missing zip, lat, or lon" }, status: :bad_request
     end
 
+    # Check if data exists in Redis cache
+    cache_key = "weather:#{zip_code}"
+    cached_data = redis.get(cache_key)
+
+    if cached_data
+      puts "Cache hit for #{zip_code}"
+      # Store result in Redis with a 30-minute expiration
+      render json: JSON.parse(cached_data).merge(cached: true)
+      return
+    end
+
     weather_data = fetch_weather(zip_code, lat, lon)
 
     if weather_data
+      redis.setex(cache_key, 1800, weather_data.to_json)
       render json: weather_data
     else
       render json: { error: "Could not fetch weather data" }, status: :service_unavailable
@@ -20,6 +33,10 @@ class WeatherController < ApplicationController
   end
 
   private
+
+  def redis
+    @redis ||= Redis.new(url: ENV["REDIS_URL"])
+  end
 
   def fetch_weather(zip_code, lat, lon)
     api_key = Rails.application.credentials.openweather_api_key

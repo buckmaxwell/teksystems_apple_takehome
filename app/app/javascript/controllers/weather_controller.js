@@ -83,11 +83,15 @@ export default class extends Controller {
     const { zip, lat, lon } = this.selectedLocation;
     const response = await fetch(`/forecast?zip=${zip}&lat=${lat}&lon=${lon}`);
     const weather = await response.json();
+    const cachedIndicator = weather.cached
+      ? `<p class="text-[10px] text-gray-400 mt-1 text-right">⚡ Loaded from cache</p>`
+      : "";
 
     // Only show weather result if there's valid data
     if (weather.temperature) {
       this.weatherTarget.classList.remove("hidden"); // Make it visible
       // Update weather details
+
       this.weatherTarget.innerHTML = `
 	    <div class="relative rounded-lg overflow-hidden shadow-lg">
 	      <div class="absolute inset-0 bg-black/50"></div> <!-- Dark overlay -->
@@ -96,6 +100,7 @@ export default class extends Controller {
 		<p>Temperature: ${weather.temperature}°F</p>
 		<p>High: ${weather.high}°F, Low: ${weather.low}°F</p>
 		<p>Forecast: ${weather.forecast}</p>
+		${cachedIndicator}
 	      </div>
 	    </div>`;
     } else {
