@@ -37,8 +37,3 @@ jobs:
         run: 'bin/rails db:test:prepare && bin/rails test test/integration'
         working-directory: app
 
-      - name: Run tests
-        env:
-          RAILS_ENV: test
-
-        working-directory: app
