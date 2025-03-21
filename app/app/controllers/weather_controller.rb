@@ -7,19 +7,18 @@ class WeatherController < ApplicationController
     lat = params[:lat]
     lon = params[:lon]
 
-    if zip_code.blank? || lat.blank? || lon.blank?
+    if lat.blank? || lon.blank?
       return render json: { error: "Missing zip, lat, or lon" }, status: :bad_request
     end
 
-    # Check if data exists in Redis cache
-    cache_key = "weather:#{zip_code}"
-    cached_data = redis.get(cache_key)
+    if zip_code.present?
+      cache_key = "weather:#{zip_code}"
+      cached_data = redis.get(cache_key)
 
-    if cached_data
-      puts "Cache hit for #{zip_code}"
-      # Store result in Redis with a 30-minute expiration
-      render json: JSON.parse(cached_data).merge(cached: true)
-      return
+      if cached_data
+        render json: JSON.parse(cached_data).merge(cached: true)
+        return
+      end
     end
 
     weather_data = fetch_weather(zip_code, lat, lon)

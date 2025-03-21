@@ -50,7 +50,7 @@ export default class extends Controller {
 
       const li = document.createElement("li");
       li.textContent = displayText;
-      li.dataset.zip = zipCode;
+      li.dataset.zip = zipCode || "";
       li.dataset.lat = lat;
       li.dataset.lon = lon;
       li.dataset.action = "click->weather#selectSuggestion";
@@ -75,7 +75,7 @@ export default class extends Controller {
   async submitForm(event) {
     event.preventDefault();
 
-    if (!this.selectedLocation || !this.selectedLocation.zip) {
+    if (!this.selectedLocation) {
       alert("Please select an address from the suggestions.");
       return;
     }
